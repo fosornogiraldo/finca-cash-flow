@@ -6,14 +6,6 @@ import { FacturaList } from "@/components/FacturaList";
 import { AporteForm } from "@/components/AporteForm";
 import { AporteList } from "@/components/AporteList";
 
-interface Factura {
-  id: string;
-  concepto: string;
-  valor: number;
-  fecha: string;
-  descripcion?: string;
-}
-
 interface Aporte {
   id: string;
   hermano: string;
@@ -24,16 +16,8 @@ interface Aporte {
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'facturas' | 'aportes'>('home');
-  const [facturas, setFacturas] = useState<Factura[]>([]);
   const [aportes, setAportes] = useState<Aporte[]>([]);
-
-  const addFactura = (factura: Omit<Factura, 'id'>) => {
-    const newFactura = {
-      ...factura,
-      id: Date.now().toString(),
-    };
-    setFacturas(prev => [...prev, newFactura]);
-  };
+  const [refreshFacturas, setRefreshFacturas] = useState(false);
 
   const addAporte = (aporte: Omit<Aporte, 'id'>) => {
     const newAporte = {
@@ -43,23 +27,28 @@ const Index = () => {
     setAportes(prev => [...prev, newAporte]);
   };
 
-  const deleteFactura = (id: string) => {
-    setFacturas(prev => prev.filter(f => f.id !== id));
-  };
-
   const deleteAporte = (id: string) => {
     setAportes(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handleFacturaAdded = () => {
+    setRefreshFacturas(prev => !prev);
+  };
+
+  const handleFacturaDeleted = (id: string) => {
+    // This callback can be used for additional logic if needed
+    console.log('Factura deleted:', id);
   };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <Dashboard facturas={facturas} aportes={aportes} />;
+        return <Dashboard facturas={[]} aportes={aportes} />;
       case 'facturas':
         return (
           <div className="grid lg:grid-cols-2 gap-6">
-            <FacturaForm onAddFactura={addFactura} />
-            <FacturaList facturas={facturas} onDeleteFactura={deleteFactura} />
+            <FacturaForm onAddFactura={handleFacturaAdded} />
+            <FacturaList refresh={refreshFacturas} onDeleteFactura={handleFacturaDeleted} />
           </div>
         );
       case 'aportes':
@@ -70,7 +59,7 @@ const Index = () => {
           </div>
         );
       default:
-        return <Dashboard facturas={facturas} aportes={aportes} />;
+        return <Dashboard facturas={[]} aportes={aportes} />;
     }
   };
 
