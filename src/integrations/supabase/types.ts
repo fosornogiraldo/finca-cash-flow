@@ -14,7 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      factura_archivos: {
+        Row: {
+          created_at: string | null
+          factura_id: string | null
+          id: string
+          nombre_archivo: string
+          tamano_bytes: number | null
+          tipo_archivo: string
+          url_archivo: string
+        }
+        Insert: {
+          created_at?: string | null
+          factura_id?: string | null
+          id?: string
+          nombre_archivo: string
+          tamano_bytes?: number | null
+          tipo_archivo: string
+          url_archivo: string
+        }
+        Update: {
+          created_at?: string | null
+          factura_id?: string | null
+          id?: string
+          nombre_archivo?: string
+          tamano_bytes?: number | null
+          tipo_archivo?: string
+          url_archivo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factura_archivos_factura_id_fkey"
+            columns: ["factura_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facturas: {
+        Row: {
+          concepto: string
+          created_at: string | null
+          descripcion: string | null
+          fecha: string
+          id: string
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          concepto: string
+          created_at?: string | null
+          descripcion?: string | null
+          fecha?: string
+          id?: string
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          concepto?: string
+          created_at?: string | null
+          descripcion?: string | null
+          fecha?: string
+          id?: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
