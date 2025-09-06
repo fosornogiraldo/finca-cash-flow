@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Dashboard } from "@/components/Dashboard";
 import { FacturaForm } from "@/components/FacturaForm";
 import { FacturaList } from "@/components/FacturaList";
 import { AporteForm } from "@/components/AporteForm";
 import { AporteList } from "@/components/AporteList";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Aporte {
   id: string;
@@ -14,10 +15,50 @@ interface Aporte {
   fecha: string;
 }
 
+interface Factura {
+  id: string;
+  concepto: string;
+  valor: number;
+  fecha: string;
+  descripcion?: string;
+}
+
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'facturas' | 'aportes'>('home');
   const [aportes, setAportes] = useState<Aporte[]>([]);
+  const [facturas, setFacturas] = useState<Factura[]>([]);
   const [refreshFacturas, setRefreshFacturas] = useState(false);
+
+  // Fetch facturas from database
+  const fetchFacturas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('facturas')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching facturas:', error);
+        return;
+      }
+      
+      const formattedFacturas: Factura[] = data?.map(factura => ({
+        id: factura.id,
+        concepto: factura.concepto,
+        valor: Number(factura.valor),
+        fecha: factura.fecha,
+        descripcion: factura.descripcion || undefined,
+      })) || [];
+      
+      setFacturas(formattedFacturas);
+    } catch (error) {
+      console.error('Error fetching facturas:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFacturas();
+  }, [refreshFacturas]);
 
   const addAporte = (aporte: Omit<Aporte, 'id'>) => {
     const newAporte = {
@@ -38,12 +79,13 @@ const Index = () => {
   const handleFacturaDeleted = (id: string) => {
     // This callback can be used for additional logic if needed
     console.log('Factura deleted:', id);
+    fetchFacturas(); // Refresh facturas after deletion
   };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <Dashboard facturas={[]} aportes={aportes} />;
+        return <Dashboard facturas={facturas} aportes={aportes} />;
       case 'facturas':
         return (
           <div className="grid lg:grid-cols-2 gap-6">
