@@ -6,6 +6,9 @@ import { FacturaList } from "@/components/FacturaList";
 import { AporteForm } from "@/components/AporteForm";
 import { AporteList } from "@/components/AporteList";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface Aporte {
   id: string;
@@ -28,6 +31,9 @@ const Index = () => {
   const [aportes, setAportes] = useState<Aporte[]>([]);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [refreshFacturas, setRefreshFacturas] = useState(false);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Fetch facturas from database
   const fetchFacturas = async () => {
@@ -61,6 +67,16 @@ const Index = () => {
   }, [refreshFacturas]);
 
   const addAporte = (aporte: Omit<Aporte, 'id'>) => {
+    if (!user) {
+      toast({
+        title: "Acceso denegado",
+        description: "Debes iniciar sesión para agregar aportes",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     const newAporte = {
       ...aporte,
       id: Date.now().toString(),
@@ -69,15 +85,41 @@ const Index = () => {
   };
 
   const deleteAporte = (id: string) => {
+    if (!user) {
+      toast({
+        title: "Acceso denegado",
+        description: "Debes iniciar sesión para eliminar aportes",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
     setAportes(prev => prev.filter(a => a.id !== id));
   };
 
   const handleFacturaAdded = () => {
+    if (!user) {
+      toast({
+        title: "Acceso denegado",
+        description: "Debes iniciar sesión para agregar facturas",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
     setRefreshFacturas(prev => !prev);
   };
 
   const handleFacturaDeleted = (id: string) => {
-    // This callback can be used for additional logic if needed
+    if (!user) {
+      toast({
+        title: "Acceso denegado",
+        description: "Debes iniciar sesión para eliminar facturas",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
     console.log('Factura deleted:', id);
     fetchFacturas(); // Refresh facturas after deletion
   };
@@ -106,7 +148,7 @@ const Index = () => {
   };
 
   return (
-    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+    <Layout activeTab={activeTab} onTabChange={setActiveTab} user={user} loading={loading}>
       {renderContent()}
     </Layout>
   );
