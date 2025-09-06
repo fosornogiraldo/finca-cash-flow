@@ -19,11 +19,11 @@ interface AporteFormProps {
 }
 
 const hermanos = [
-  "Juan Carlos",
-  "María Elena",
-  "Pedro José",
-  "Ana Lucía",
-  "Luis Fernando"
+  "Elizabeth",
+  "Patricia",
+  "Ramón",
+  "Eugenia",
+  "Gilma"
 ];
 
 export function AporteForm({ onAddAporte }: AporteFormProps) {
